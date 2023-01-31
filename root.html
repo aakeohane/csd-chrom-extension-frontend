@@ -30,17 +30,18 @@ body {
   max-width: 200px;
   width: 100%;
   height: 200px;
-  padding: 20px 15px 0px 15px;
+  padding: 20px 15px 0px;
   border-radius: 10%;
   text-align: center;
   position: relative;
+  white-space: pre;
   font-family: 'Bebas Neue', cursive;
   letter-spacing: normal;
 }
 
 #timer {
   font-style: italic;
-  font-size: 12px;
+  font-size: 11px;
   position: absolute;
   bottom: -5px;
   font-family: Arial, Helvetica, sans-serif;
@@ -61,99 +62,109 @@ body {
       </div>
     </div>
     <script type="module">
-       import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-  import { getDatabase, ref, get, child, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+      import { getDatabase, ref, child, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDpNvU6P5hKM6XZFZhOnQn8omh6v4XGWF8",
-    authDomain: "club-sd-counter.firebaseapp.com",
-    databaseURL: "https://club-sd-counter-default-rtdb.firebaseio.com",
-    projectId: "club-sd-counter",
-    storageBucket: "club-sd-counter.appspot.com",
-    messagingSenderId: "181109959257",
-    appId: "1:181109959257:web:cb9e9ab0d75b4ce21b5f48"
-  };
+      const firebaseConfig = {
+        apiKey: "AIzaSyDpNvU6P5hKM6XZFZhOnQn8omh6v4XGWF8",
+        authDomain: "club-sd-counter.firebaseapp.com",
+        databaseURL: "https://club-sd-counter-default-rtdb.firebaseio.com",
+        projectId: "club-sd-counter",
+        storageBucket: "club-sd-counter.appspot.com",
+        messagingSenderId: "181109959257",
+        appId: "1:181109959257:web:cb9e9ab0d75b4ce21b5f48"
+      };
 
-initializeApp(firebaseConfig);
+      initializeApp(firebaseConfig);
 
-const db = getDatabase();
-const dbRef = ref(db);
-const intro = document.getElementById("intro")
-const peopleAmount = document.getElementById("db-amount")
-const close = document.getElementById("close")
-const clock = document.getElementById("timer")
+      const db = getDatabase();
+      const dbRef = ref(db);
+      const intro = document.getElementById("intro")
+      const peopleAmount = document.getElementById("db-amount")
+      const close = document.getElementById("close")
+      const clock = document.getElementById("timer")
 
+      onValue(child(dbRef, '/'), (snapshot) => {
+        setStorage(snapshot.val())
+        const timeObject = localStorage.getItem('amountFromDB')
+        const dbValue = JSON.parse(timeObject)
+        const data = dbValue.count
+        const time = dbValue.timeStamp
+        const member = (data === 1) ? 'member' : 'members'
+        const are = (data === 1) ? 'is' : 'are'
+        intro.textContent = `There ${are} currently`
+        peopleAmount.textContent = data 
+        close.textContent = `${member} inside\r\nclub san diego`
+        setTimeUpdate(time)
+      })
 
-get(child(dbRef, `/`)).then((snapshot) => {
-  if (snapshot.exists()) {
-    setStorage(snapshot.val())
-    const pastObject = localStorage.getItem('amountFromDB')
-    const pastValue = JSON.parse(pastObject)
-    setTimeUpdate(pastValue)
-  } else {
-    console.log("No data available");
-  }
-}).catch((error) => {
-  console.error(error);
-});
+      function resetTimerOnTabReturn() {
+        const localObject = localStorage.getItem('amountFromDB')
+        const timeObject = JSON.parse(localObject)
+        const time = timeObject.timeStamp
+        setTimeUpdate(time)
+      }
 
-onValue(child(dbRef, '/'), (snapshot) => {
-    setStorage(snapshot.val())
-    const data = snapshot.val().count
-    const time = snapshot.val().timeStamp
-    const member = (data === 1) ? 'member' : 'members'
-    const are = (data === 1) ? 'is' : 'are'
-    intro.textContent = `There ${are} currently`
-    peopleAmount.textContent = data 
-    close.textContent = `${member} waiting for you inside the club`
-    const currentTime = new Date().getTime()
-    let timeDifference = currentTime - time
-    // 500 is arbitray, everytime database updates, startTimer() should run (time difference will be less than 500), however, I did not want 
-    // startTimer() to run if user refreshed page with the database not being updated over 10 or 30 minutes ago, this keeps the timer in a 
-    // conditional format for each function
-    // --> I had to do this, because this function automatically runs on a page refresh
-    timeDifference < 500 ? startTimer() : null
-})
+      document.addEventListener("visibilitychange", function() {
+        if (document.visibilityState === 'visible') {
+          resetTimerOnTabReturn()
+        } else {
+          return null
+        }
+      });
 
-function setStorage(info) {
-  localStorage.setItem("amountFromDB", JSON.stringify(info))
-}
+      function setStorage(info) {
+        localStorage.setItem("amountFromDB", JSON.stringify(info))
+      }
 
-function updateTen(timeDifference) {
-  clock.textContent = "Last updated over 10 minutes ago"
-  let countdown
-  timeDifference ? countdown = 1800000 - timeDifference : countdown = 1800000
-  setTimeout(updateThirty, countdown)
-}
+      function updateTen(timeLeft) {
+        clock.textContent = "Last updated over 10 minutes ago"
+        const countdown = 1800000 - timeLeft
+        setTimeout(updateThirty, countdown)
+      }
 
-function updateThirty() {
-  clock.textContent = "Last updated over 30 minutes ago"
-}
+      function updateThirty(timeLeft) {
+        clock.textContent = "Last updated over 30 minutes ago"
+        const countdown = 3600000 - timeLeft
+        setTimeout(updateHour, countdown)
+      }
 
-// timeLeft variable will be undefined on database update hence setting setTimeout to 10 minutes,this will also rerun on refresh only
-// if timeLeft variable is less than ten minutes.
-function startTimer(timeLeft) {
-  let countdown
-  console.log("timeleft function")
-  timeLeft ? countdown = 600000 - timeLeft : countdown = 600000
-  clock.textContent = ''
-  setTimeout(updateTen, countdown)
-}
+      function updateHour() {
+        clock.textContent = "Last updated over an hour ago"
+      }
 
-function setTimeUpdate(time) {
-  const currentTime = new Date().getTime()
-  let timeDifference = currentTime - time.timeStamp
-  switch(true) {
-    case (timeDifference >= 600000 && timeDifference <= 1800000):
-      updateTen(timeDifference)
-      break
-    case (timeDifference >= 1800000):
-      updateThirty()
-      break
-    default:
-      startTimer(timeDifference)
-  }
-}
+      function startTimer(timeLeft) {
+        const countdown = 600000 - timeLeft
+        clock.textContent = ''
+        setTimeout(updateTen, countdown)
+      }
+
+      // time in milliseconds
+      // 10 minutes = 600000
+      // 30 minuttes = 1800000
+      // one hour = 3600000
+
+      function setTimeUpdate(databaseTime) {
+        const currentTime = new Date().getTime()
+        let timeDifference = currentTime - databaseTime
+        switch(true) {
+          // time between updates is between 10 and 30 minutes
+          case (timeDifference >= 600000 && timeDifference <= 1800000):
+            updateTen(timeDifference)
+            break
+          // time between updates is between 30 and one hour
+          case (timeDifference >= 1800000 && timeDifference <= 3600000):
+            updateThirty(timeDifference)
+            break
+          // greater than an hour
+          case (timeDifference >= 3600000):
+            updateHour()
+            break
+          // less than ten minutes is default
+          default:
+            startTimer(timeDifference)
+        }
+      }
     </script>
   </body>
 </html>

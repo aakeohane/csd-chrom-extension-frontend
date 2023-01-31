@@ -59,8 +59,14 @@ function updateTen(timeLeft) {
   setTimeout(updateThirty, countdown)
 }
 
-function updateThirty() {
+function updateThirty(timeLeft) {
   clock.textContent = "Last updated over 30 minutes ago"
+  const countdown = 3600000 - timeLeft
+  setTimeout(updateHour, countdown)
+}
+
+function updateHour() {
+  clock.textContent = "Last updated over an hour ago"
 }
 
 function startTimer(timeLeft) {
@@ -69,17 +75,28 @@ function startTimer(timeLeft) {
   setTimeout(updateTen, countdown)
 }
 
+// time in milliseconds
+// 10 minutes = 600000
+// 30 minuttes = 1800000
+// one hour = 3600000
+
 function setTimeUpdate(databaseTime) {
-  console.log("reset timer yay")
   const currentTime = new Date().getTime()
   let timeDifference = currentTime - databaseTime
   switch(true) {
+    // time between updates is between 10 and 30 minutes
     case (timeDifference >= 600000 && timeDifference <= 1800000):
       updateTen(timeDifference)
       break
-    case (timeDifference >= 1800000):
-      updateThirty()
+    // time between updates is between 30 and one hour
+    case (timeDifference >= 1800000 && timeDifference <= 3600000):
+      updateThirty(timeDifference)
       break
+    // greater than an hour
+    case (timeDifference >= 3600000):
+      updateHour()
+      break
+    // less than ten minutes is default
     default:
       startTimer(timeDifference)
   }
