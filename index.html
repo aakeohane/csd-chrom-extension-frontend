@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Database Display and Counter</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+  </style>
+  <body>
+    <div class="container">
+      <div class="display">
+        <p id="intro"></p>
+        <div id="db-amount"></div>
+        <p id="close"></p>
+        <!-- <div id="timer"></div> -->
+      </div>
+      
+      <div class="counter">
+        <input type="number" id="num" min="0" value="0">
+        <div class="btns">
+          <button class="minus">
+            <i class="fas fa-minus"></i>
+          </button>
+          <button class="reset">
+            <i class="fas fa-redo"></i>
+          </button>
+          <button class="add">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="firebase.js"></script>
+  </body>
+</html>
