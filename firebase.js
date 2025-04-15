@@ -18,14 +18,12 @@ const dbRef = ref(db);
 const intro = document.getElementById("intro")
 const peopleAmount = document.getElementById("db-amount")
 const close = document.getElementById("close")
-const clock = document.getElementById("timer")
 
 onValue(child(dbRef, '/members'), (snapshot) => {
   setStorage(snapshot.val())
   const timeObject = localStorage.getItem('amountFromDB')
   const dbValue = JSON.parse(timeObject)
   const data = dbValue.count
-  // const time = dbValue.timeStamp
   const member = (data === 1) ? 'member' : 'members'
   const are = (data === 1) ? 'is' : 'are'
   intro.textContent = `There ${are} currently`
@@ -33,21 +31,10 @@ onValue(child(dbRef, '/members'), (snapshot) => {
   close.textContent = `${member} inside\r\n the club`
 })
 
-
-// document.addEventListener("visibilitychange", function() {
-//   if (document.visibilityState === 'visible') {
-//     resetTimerOnTabReturn()
-//   } else {
-//     return null
-//   }
-// });
-
 function setStorage(info) {
   localStorage.setItem("amountFromDB", JSON.stringify(info))
 }
 
-// FIREBASE DATABASE
-// const dbRef = ref(getDatabase(app));
 get(child(dbRef, `/members`)).then((snapshot) => {
   if (snapshot.exists()) {
     console.log(snapshot.val());
@@ -57,22 +44,6 @@ get(child(dbRef, `/members`)).then((snapshot) => {
 }).catch((error) => {
   console.error(error);
 });
-
-// document.addEventListener((msg, sender, response) => {
-//   switch (msg.type) {
-//     case 'updateValue':
-//       const time = new Date().getTime()
-//       set(ref(db, '/members'), {
-//         count: JSON.parse(msg.number) || 0,
-//         timeStamp: time
-//       })
-//       response('success');
-//       break;
-//     default:
-//       response('unknown request');
-//       break;
-//   }
-// });
 
 window.addEventListener('updateValue', (event) => {
   const time = new Date().getTime()

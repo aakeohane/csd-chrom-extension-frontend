@@ -4,7 +4,6 @@ const increase = document.querySelector(".add");
 const decrease = document.querySelector(".minus");
 const reset = document.querySelector(".reset");
 let amount
-export const values = {}
 
 localStorage.getItem(["number"], (data) => {
   if (typeof data.number == "undefined" || data.number == "") {
